@@ -7,18 +7,6 @@ AL-Madina Electric & Solar House.
 Powered by ASP.NET Core 9, Electron.NET, Bootstrap 5, and SQLite for 
 fast, reliable and offline-capable performance.
 
-
-Screenshots
------------
-<img width="1303" height="619" alt="image" src="https://github.com/user-attachments/assets/94a3c29a-68fa-41b3-a5fb-f3d9a5ddf8b9" />
-<img width="1215" height="598" alt="image" src="https://github.com/user-attachments/assets/d19b5215-a796-47e7-8392-033dc0757872" />
-<img width="1263" height="639" alt="image" src="https://github.com/user-attachments/assets/d169c1db-98b1-4a7b-922f-7d14694e051b" />
-<img width="1248" height="625" alt="image" src="https://github.com/user-attachments/assets/7513b152-7733-4f9d-97dd-a9cdbba6d7d5" />
-<img width="1108" height="635" alt="image" src="https://github.com/user-attachments/assets/3a586d04-a31b-4076-8370-6c74d2c9d05d" />
-<img width="1074" height="632" alt="image" src="https://github.com/user-attachments/assets/a83c8883-c334-4ca1-bf26-5ecb75f6f3f4" />
-<img width="1251" height="588" alt="image" src="https://github.com/user-attachments/assets/34ca5e3a-1a5a-48db-b318-ee58e4e5d322" />
-
-
 Features
 --------
 
@@ -170,3 +158,14 @@ This project is PRIVATE and built for internal business use only. If you want to
 Developer
 ---------
 Muhammad Hasaan Khokhar
+
+Screenshots
+-----------
+<img width="1303" height="619" alt="image" src="https://github.com/user-attachments/assets/94a3c29a-68fa-41b3-a5fb-f3d9a5ddf8b9" />
+<img width="1215" height="598" alt="image" src="https://github.com/user-attachments/assets/d19b5215-a796-47e7-8392-033dc0757872" />
+<img width="1263" height="639" alt="image" src="https://github.com/user-attachments/assets/d169c1db-98b1-4a7b-922f-7d14694e051b" />
+<img width="1248" height="625" alt="image" src="https://github.com/user-attachments/assets/7513b152-7733-4f9d-97dd-a9cdbba6d7d5" />
+<img width="1108" height="635" alt="image" src="https://github.com/user-attachments/assets/3a586d04-a31b-4076-8370-6c74d2c9d05d" />
+<img width="1074" height="632" alt="image" src="https://github.com/user-attachments/assets/a83c8883-c334-4ca1-bf26-5ecb75f6f3f4" />
+<img width="1251" height="588" alt="image" src="https://github.com/user-attachments/assets/34ca5e3a-1a5a-48db-b318-ee58e4e5d322" />
+
