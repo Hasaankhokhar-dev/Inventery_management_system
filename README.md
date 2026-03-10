@@ -151,10 +151,6 @@ Key Pages
 /Invoices/Edit/{id}        => Edit invoice
 /Customer/Index            => Manage electricians/customers
 
-License
--------
-This project is PRIVATE and built for internal business use only. If you want to use this project, you must purchase it.
-
 Developer
 ---------
 Muhammad Hasaan Khokhar
