@@ -1,0 +1,58 @@
+{
+  "name": "final-inventory-system",
+  "version": "1.0.0", 
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "dev": "electron . --dev"
+  },
+  "devDependencies": {
+    "electron": "^23.0.0",
+    "electron-builder": "^26.0.12"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "sqlite3": "^5.1.6",
+    "cors": "^2.8.5",
+    "body-parser": "^1.20.2"
+  },
+  "build": {
+    "appId": "com.yourcompany.finalinventory",
+    "productName": "Final Inventory System", 
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "package.json",
+      "package-lock.json",
+      "published/**/*",
+      "wwwroot/**/*",
+      "inventory.db",
+      "appsettings.json",
+      "node_modules/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "published",
+        "to": "published",
+        "filter": ["**/*"]
+      },
+      {
+        "from": "wwwroot",
+        "to": "wwwroot", 
+        "filter": ["**/*"]
+      }
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
+  }
+}

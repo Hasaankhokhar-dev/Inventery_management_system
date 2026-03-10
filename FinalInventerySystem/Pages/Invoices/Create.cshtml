@@ -1,0 +1,670 @@
+﻿@* @page
+@model FinalInventerySystem.Pages.Invoices.CreateModel
+@{
+    ViewData["Title"] = "Create Invoice";
+}
+
+<div class="container mt-5">
+    <div class="card shadow-lg border-0 rounded-3">
+        <!-- Header -->
+        <div class="card-header text-white py-3"
+             style="background: linear-gradient(90deg, #0062E6, #33AEFF);">
+            <h4 class="mb-0">
+                📝 Create New Invoice
+            </h4>
+        </div>
+
+        <!-- Body -->
+        <div class="card-body">
+            <form method="post">
+                @Html.AntiForgeryToken()
+
+                <!-- Customer Info -->
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <label asp-for="Invoice.CustomerName" class="form-label fw-bold">Customer Name</label>
+                        <input asp-for="Invoice.CustomerName" class="form-control" placeholder="Enter customer name" required />
+                        <span asp-validation-for="Invoice.CustomerName" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="Invoice.Phone" class="form-label fw-bold">Phone</label>
+                        <input asp-for="Invoice.Phone" class="form-control" placeholder="e.g. 0300-1234567" />
+                        <span asp-validation-for="Invoice.Phone" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="Invoice.Address" class="form-label fw-bold">Address</label>
+                        <input asp-for="Invoice.Address" class="form-control" placeholder="Customer address" />
+                        <span asp-validation-for="Invoice.Address" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <!-- Product Search -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold">🔎 Search Product</label>
+                    <input type="text" id="productSearch" class="form-control" placeholder="Type product name..." autocomplete="off" />
+                    <ul id="productResults" class="list-group position-absolute w-50"></ul>
+                </div>
+
+                <!-- Invoice Items -->
+                <h5 class="text-primary fw-bold mb-3">🛒 Invoice Items</h5>
+                <div class="table-responsive">
+                    <table id="invoiceItems" class="table table-bordered table-striped shadow-sm">
+                        <thead class="table-primary text-center align-middle">
+                            <tr>
+                                <th style="width:25%;">Product</th>
+                                <th style="width:15%;">Available Stock</th>
+                                <th style="width:15%;">Price</th>
+                                <th style="width:15%;">Quantity</th>
+                                <th style="width:15%;">Subtotal</th>
+                                <th style="width:15%;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="align-middle">
+                            <!-- Items will be added dynamically -->
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="4" class="text-end fw-bold">💵 Total:</td>
+                                <td class="text-end fw-bold text-success" id="grandTotal">Rs. 0</td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <!-- Actions -->
+                <div class="mt-4 d-flex justify-content-between">
+                    <a asp-page="Index" class="btn btn-outline-secondary px-4">
+                        <i class="bi bi-arrow-left"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-success px-4">
+                        <i class="bi bi-save"></i> Save Invoice
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // ✅ Search products dynamically
+        $("#productSearch").on("keyup", function () {
+            let query = $(this).val();
+            if (query.length < 1) {
+                $("#productResults").empty();
+                return;
+            }
+
+            $.getJSON("/Invoices/SearchProducts", { query: query }, function (results) {
+                let list = "";
+                results.forEach(p => {
+                    list += `<li class="list-group-item list-group-item-action"
+                                data-id="${p.id}" data-name="${p.name}"
+                                data-price="${p.basePrice}" data-stock="${p.quantity}">
+                                ${p.name} (Stock: ${p.quantity}, Price: Rs. ${p.basePrice})
+                             </li>`;
+                });
+                $("#productResults").html(list);
+            });
+        });
+
+        // ✅ Add selected product to invoice items
+        $(document).on("click", "#productResults li", function () {
+            let id = $(this).data("id");
+            let name = $(this).data("name");
+            let price = parseFloat($(this).data("price"));
+            let stock = $(this).data("stock");
+
+            let rowCount = $("#invoiceItems tbody tr").length;
+
+            let row = `
+                <tr class="align-middle text-center">
+                    <td class="text-start">
+                        ${name}
+                        <input type="hidden" name="SelectedItems[${rowCount}].InventoryId" value="${id}" />
+                    </td>
+                    <td>${stock}</td>
+                    <td class="text-end">Rs. ${price.toLocaleString()}</td>
+                    <td>
+                        <input type="number" name="SelectedItems[${rowCount}].Quantity"
+                               value="1" min="1" max="${stock}"
+                               class="form-control form-control-sm qty text-center mx-auto"
+                               style="max-width:80px;" />
+                    </td>
+                    <td class="subtotal text-end fw-bold">Rs. ${price.toLocaleString()}</td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-danger removeItem">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+            $("#invoiceItems tbody").append(row);
+            $("#productResults").empty();
+            $("#productSearch").val("");
+            recalcTotals();
+        });
+
+        // ✅ Remove item
+        $(document).on("click", ".removeItem", function () {
+            $(this).closest("tr").remove();
+            recalcTotals();
+        });
+
+        // ✅ Recalculate totals
+        $(document).on("input", ".qty", recalcTotals);
+
+        function recalcTotals() {
+            let total = 0;
+            $("#invoiceItems tbody tr").each(function () {
+                let qty = parseFloat($(this).find(".qty").val()) || 0;
+                let price = parseFloat($(this).find("td:nth-child(3)").text().replace("Rs.", "").replace(",", "")) || 0;
+                let subtotal = qty * price;
+                $(this).find(".subtotal").text("Rs. " + subtotal.toLocaleString());
+                total += subtotal;
+            });
+            $("#grandTotal").text("Rs. " + total.toLocaleString());
+        }
+    </script>
+}      ----------working ---------- *@
+
+
+
+
+
+@* 
+@page
+@model FinalInventerySystem.Pages.Invoices.CreateModel
+@{
+    ViewData["Title"] = "Create Invoice";
+}
+
+<div class="container mt-5">
+    <div class="card shadow-lg border-0 rounded-3">
+        <!-- Header -->
+        <div class="card-header text-white py-3"
+             style="background: linear-gradient(90deg, #0062E6, #33AEFF);">
+            <h4 class="mb-0">
+                📝 Create New Invoice
+            </h4>
+        </div>
+
+        <!-- Body -->
+        <div class="card-body">
+            <form method="post">
+                @Html.AntiForgeryToken()
+
+                <!-- ✅ SIRF YEH HIDDEN FIELD ADD KARO -->
+                <input type="hidden" asp-for="ReturnPage" />
+
+                <!-- Customer Info -->
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <label asp-for="Invoice.CustomerName" class="form-label fw-bold">Customer Name</label>
+                        <input asp-for="Invoice.CustomerName" class="form-control" placeholder="Enter customer name" required />
+                        <span asp-validation-for="Invoice.CustomerName" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="Invoice.Phone" class="form-label fw-bold">Phone</label>
+                        <input asp-for="Invoice.Phone" class="form-control" placeholder="e.g. 0300-1234567" />
+                        <span asp-validation-for="Invoice.Phone" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="Invoice.Address" class="form-label fw-bold">Address</label>
+                        <input asp-for="Invoice.Address" class="form-control" placeholder="Customer address" />
+                        <span asp-validation-for="Invoice.Address" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <!-- Product Search -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold">🔎 Search Product</label>
+                    <input type="text" id="productSearch" class="form-control" placeholder="Type product name..." autocomplete="off" />
+                    <ul id="productResults" class="list-group position-absolute w-50"></ul>
+                </div>
+
+                <!-- Invoice Items -->
+                <h5 class="text-primary fw-bold mb-3">🛒 Invoice Items</h5>
+                <div class="table-responsive">
+                    <table id="invoiceItems" class="table table-bordered table-striped shadow-sm">
+                        <thead class="table-primary text-center align-middle">
+                            <tr>
+                                <th style="width:25%;">Product</th>
+                                <th style="width:15%;">Available Stock</th>
+                                <th style="width:15%;">Price</th>
+                                <th style="width:15%;">Quantity</th>
+                                <th style="width:15%;">Subtotal</th>
+                                <th style="width:15%;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="align-middle">
+                            <!-- Items will be added dynamically -->
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="4" class="text-end fw-bold">💵 Total:</td>
+                                <td class="text-end fw-bold text-success" id="grandTotal">Rs. 0</td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <!-- Actions -->
+                <div class="mt-4 d-flex justify-content-between">
+                    <!-- ✅ SIRF YEH LINE CHANGE - returnPage USE KARO -->
+                    <a asp-page="Index" asp-route-pageIndex="@Model.ReturnPage" class="btn btn-outline-secondary px-4">
+                        <i class="bi bi-arrow-left"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-success px-4">
+                        <i class="bi bi-save"></i> Save Invoice
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // ✅ Search products dynamically
+        $("#productSearch").on("keyup", function () {
+            let query = $(this).val();
+            if (query.length < 1) {
+                $("#productResults").empty();
+                return;
+            }
+
+            $.getJSON("/Invoices/SearchProducts", { query: query }, function (results) {
+                let list = "";
+                results.forEach(p => {
+                    list += `<li class="list-group-item list-group-item-action"
+                                data-id="${p.id}" data-name="${p.name}"
+                                data-price="${p.basePrice}" data-stock="${p.quantity}">
+                                ${p.name} (Stock: ${p.quantity}, Price: Rs. ${p.basePrice})
+                             </li>`;
+                });
+                $("#productResults").html(list);
+            });
+        });
+
+        // ✅ Add selected product to invoice items
+        $(document).on("click", "#productResults li", function () {
+            let id = $(this).data("id");
+            let name = $(this).data("name");
+            let price = parseFloat($(this).data("price"));
+            let stock = $(this).data("stock");
+
+            let rowCount = $("#invoiceItems tbody tr").length;
+
+            let row = `
+                <tr class="align-middle text-center">
+                    <td class="text-start">
+                        ${name}
+                        <input type="hidden" name="SelectedItems[${rowCount}].InventoryId" value="${id}" />
+                    </td>
+                    <td>${stock}</td>
+                    <td class="text-end">Rs. ${price.toLocaleString()}</td>
+                    <td>
+                        <input type="number" name="SelectedItems[${rowCount}].Quantity"
+                               value="1" min="1" max="${stock}"
+                               class="form-control form-control-sm qty text-center mx-auto"
+                               style="max-width:80px;" />
+                    </td>
+                    <td class="subtotal text-end fw-bold">Rs. ${price.toLocaleString()}</td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-danger removeItem">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+            $("#invoiceItems tbody").append(row);
+            $("#productResults").empty();
+            $("#productSearch").val("");
+            recalcTotals();
+        });
+
+        // ✅ Remove item
+        $(document).on("click", ".removeItem", function () {
+            $(this).closest("tr").remove();
+            recalcTotals();
+        });
+
+        // ✅ Recalculate totals
+        $(document).on("input", ".qty", recalcTotals);
+
+        function recalcTotals() {
+            let total = 0;
+            $("#invoiceItems tbody tr").each(function () {
+                let qty = parseFloat($(this).find(".qty").val()) || 0;
+                let price = parseFloat($(this).find("td:nth-child(3)").text().replace("Rs.", "").replace(",", "")) || 0;
+                let subtotal = qty * price;
+                $(this).find(".subtotal").text("Rs. " + subtotal.toLocaleString());
+                total += subtotal;
+            });
+            $("#grandTotal").text("Rs. " + total.toLocaleString());
+        }
+    </script>
+}    
+workign*@
+
+
+
+@page
+@model FinalInventerySystem.Pages.Invoices.CreateModel
+@{
+    ViewData["Title"] = "Create Invoice";
+}
+
+<style>
+    /* ✅ Naye item highlight animation - YAHAN PE RAKHO */
+    @@keyframes highlightFade {
+        0% {
+            background-color: #e8f5e8;
+        }
+
+        100% {
+            background-color: #ffffff;
+        }
+    }
+
+    .new-item-highlight {
+        animation: highlightFade 1.5s ease-in-out;
+    }
+
+    /* ✅ Search results styling */
+    #productResults {
+        z-index: 1000;
+        max-height: 200px;
+        overflow-y: auto;
+        display: none;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+
+        #productResults li {
+            cursor: pointer;
+        }
+
+            #productResults li:hover {
+                background-color: #f8f9fa;
+            }
+
+    .input-group-sm {
+        max-width: 120px;
+    }
+</style>
+
+<div class="container mt-5">
+    <div class="card shadow-lg border-0 rounded-3">
+        <!-- Header -->
+        <div class="card-header text-white py-3"
+             style="background: linear-gradient(90deg, #0062E6, #33AEFF);">
+            <h4 class="mb-0">
+                📝 Create New Invoice
+            </h4>
+        </div>
+
+        <!-- Body -->
+        <div class="card-body">
+            <form method="post">
+                @Html.AntiForgeryToken()
+
+                <input type="hidden" asp-for="ReturnPage" />
+
+                <!-- Customer Info -->
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <label asp-for="Invoice.CustomerName" class="form-label fw-bold">Customer Name</label>
+                        <input asp-for="Invoice.CustomerName" class="form-control" placeholder="Enter customer name" required />
+                        <span asp-validation-for="Invoice.CustomerName" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="Invoice.Phone" class="form-label fw-bold">Phone</label>
+                        <input asp-for="Invoice.Phone" class="form-control" placeholder="e.g. 0300-1234567" />
+                        <span asp-validation-for="Invoice.Phone" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="Invoice.Address" class="form-label fw-bold">Address</label>
+                        <input asp-for="Invoice.Address" class="form-control" placeholder="Customer address" />
+                        <span asp-validation-for="Invoice.Address" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <!-- Product Search -->
+                <div class="mb-4 position-relative">
+                    <label class="form-label fw-bold">🔎 Search Product</label>
+                    <input type="text" id="productSearch" class="form-control" placeholder="Type product name..." autocomplete="off" />
+                    <ul id="productResults" class="list-group position-absolute w-100 mt-1"></ul>
+                </div>
+
+                <!-- Invoice Items -->
+                <h5 class="text-primary fw-bold mb-3">🛒 Invoice Items</h5>
+                <div class="table-responsive">
+                    <table id="invoiceItems" class="table table-bordered table-striped shadow-sm">
+                        <thead class="table-primary text-center align-middle">
+                            <tr>
+                                <th style="width:25%;">Product</th>
+                                <th style="width:15%;">Available Stock</th>
+                                <th style="width:15%;">Price</th>
+                                <th style="width:15%;">Quantity</th>
+                                <th style="width:15%;">Subtotal</th>
+                                <th style="width:15%;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="align-middle">
+                            <!-- Items will be added dynamically -->
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="4" class="text-end fw-bold">💵 Total:</td>
+                                <td class="text-end fw-bold text-success" id="grandTotal">Rs. 0</td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <!-- Actions -->
+                <div class="mt-4 d-flex justify-content-between">
+                    <a asp-page="Index" asp-route-pageIndex="@Model.ReturnPage" class="btn btn-outline-secondary px-4">
+                        <i class="bi bi-arrow-left"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-success px-4">
+                        <i class="bi bi-save"></i> Save Invoice
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // ✅ Search products dynamically
+        $("#productSearch").on("keyup", function () {
+            let query = $(this).val();
+            if (query.length < 1) {
+                $("#productResults").empty().hide();
+                return;
+            }
+
+            $.getJSON("/Invoices/SearchProducts", { query: query }, function (results) {
+                let list = "";
+                if (results.length > 0) {
+                    results.forEach(p => {
+                        list += `<li class="list-group-item list-group-item-action"
+                                    data-id="${p.id}" data-name="${p.name}"
+                                    data-price="${p.basePrice}" data-stock="${p.quantity}">
+                                    <strong>${p.name}</strong><br>
+                                    <small>Stock: ${p.quantity} | Price: Rs. ${p.basePrice.toLocaleString()}</small>
+                                 </li>`;
+                    });
+                    $("#productResults").html(list).show();
+                } else {
+                    $("#productResults").html('<li class="list-group-item text-muted">No products found</li>').show();
+                }
+            }).fail(function() {
+                $("#productResults").html('<li class="list-group-item text-danger">Search failed. Please try again.</li>').show();
+            });
+        });
+
+        // ✅ Add selected product to invoice items - TOP PAR
+        $(document).on("click", "#productResults li", function () {
+            let id = $(this).data("id");
+            let name = $(this).data("name");
+            let price = parseFloat($(this).data("price"));
+            let stock = $(this).data("stock");
+
+            // ✅ Pehle check karein kya yeh product already added hai?
+            let existingRow = $(`#invoiceItems tbody tr input[value="${id}"]`).closest('tr');
+            if (existingRow.length > 0) {
+                // Agar product pehle se hai, toh uski quantity increase karein
+                let qtyInput = existingRow.find('.qty');
+                let currentQty = parseInt(qtyInput.val()) || 0;
+                let newQty = currentQty + 1;
+                if (newQty <= stock) {
+                    qtyInput.val(newQty).trigger('input');
+
+                    // Existing row ko highlight karein
+                    existingRow.addClass('new-item-highlight');
+                    setTimeout(() => {
+                        existingRow.removeClass('new-item-highlight');
+                    }, 1500);
+                } else {
+                    alert(`❌ Maximum stock limit reached! Only ${stock} items available.`);
+                }
+
+                $("#productResults").empty().hide();
+                $("#productSearch").val("");
+                return;
+            }
+
+            let rowCount = $("#invoiceItems tbody tr").length;
+
+            let row = `
+                <tr class="align-middle text-center new-item-highlight">
+                    <td class="text-start">
+                        <strong>${name}</strong>
+                        <input type="hidden" name="SelectedItems[${rowCount}].InventoryId" value="${id}" />
+                    </td>
+                    <td><span class="badge bg-secondary">${stock}</span></td>
+                    <td class="text-end fw-bold">Rs. ${price.toLocaleString()}</td>
+                    <td>
+                        <div class="input-group input-group-sm mx-auto" style="max-width: 120px;">
+                            <button class="btn btn-outline-secondary minus-btn" type="button">-</button>
+                            <input type="number" name="SelectedItems[${rowCount}].Quantity"
+                                   value="1" min="1" max="${stock}"
+                                   class="form-control form-control-sm qty text-center" />
+                            <button class="btn btn-outline-secondary plus-btn" type="button">+</button>
+                        </div>
+                    </td>
+                    <td class="subtotal text-end fw-bold text-success">Rs. ${price.toLocaleString()}</td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-danger removeItem">
+                            <i class="bi bi-trash"></i> Remove
+                        </button>
+                    </td>
+                </tr>
+            `;
+
+            // ✅ YAHI LINE CHANGE - append ki jagah prepend use karo (TOP PAR)
+            $("#invoiceItems tbody").prepend(row);
+
+            $("#productResults").empty().hide();
+            $("#productSearch").val("");
+            recalcTotals();
+
+            // ✅ Naye item par auto focus
+            setTimeout(function() {
+                $("#invoiceItems tbody tr:first .qty").focus().select();
+            }, 100);
+        });
+
+        // ✅ Remove item
+        $(document).on("click", ".removeItem", function () {
+            if (confirm("Are you sure you want to remove this item?")) {
+                $(this).closest("tr").remove();
+                recalcTotals();
+            }
+        });
+
+        // ✅ + - buttons for quantity
+        $(document).on("click", ".plus-btn", function() {
+            let input = $(this).siblings(".qty");
+            let max = parseInt(input.attr("max"));
+            let current = parseInt(input.val()) || 0;
+            if (current < max) {
+                input.val(current + 1).trigger("input");
+            } else {
+                alert(`❌ Maximum stock limit reached! Only ${max} items available.`);
+            }
+        });
+
+        $(document).on("click", ".minus-btn", function() {
+            let input = $(this).siblings(".qty");
+            let current = parseInt(input.val()) || 1;
+            if (current > 1) {
+                input.val(current - 1).trigger("input");
+            }
+        });
+
+        // ✅ Recalculate totals
+        $(document).on("input", ".qty", recalcTotals);
+
+        function recalcTotals() {
+            let total = 0;
+            $("#invoiceItems tbody tr").each(function () {
+                let qty = parseFloat($(this).find(".qty").val()) || 0;
+                let priceText = $(this).find("td:nth-child(3)").text();
+                let price = parseFloat(priceText.replace("Rs.", "").replace(/,/g, "")) || 0;
+                let subtotal = qty * price;
+                $(this).find(".subtotal").text("Rs. " + subtotal.toLocaleString());
+                total += subtotal;
+            });
+            $("#grandTotal").text("Rs. " + total.toLocaleString());
+        }
+
+        // ✅ Keyboard shortcuts
+        $(document).on('keydown', function(e) {
+            // F2 for search focus
+            if (e.key === 'F2') {
+                e.preventDefault();
+                $("#productSearch").focus();
+                return false;
+            }
+
+            // Ctrl+S for save
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                $("form").submit();
+                return false;
+            }
+
+            // Escape to clear search
+            if (e.key === 'Escape') {
+                $("#productResults").empty().hide();
+                $("#productSearch").val("");
+            }
+        });
+
+        // ✅ Click outside to close search results
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('#productSearch, #productResults').length) {
+                $("#productResults").hide();
+            }
+        });
+
+        // ✅ Search box focus pe results show karein
+        $("#productSearch").on('focus', function() {
+            if ($("#productResults").children().length > 0) {
+                $("#productResults").show();
+            }
+        });
+    </script>
+}

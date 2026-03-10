@@ -1,0 +1,121 @@
+{
+  "2": {
+    "InvoiceId": 2,
+    "AdjustmentAmount": 2100,
+    "AdjustmentType": "-",
+    "DiscountAmount": 0,
+    "LastUpdated": "2025-10-28T19:07:25.5155708+05:00"
+  },
+  "3": {
+    "InvoiceId": 3,
+    "AdjustmentAmount": 2110,
+    "AdjustmentType": "\u002B",
+    "DiscountAmount": 0,
+    "LastUpdated": "2025-10-28T19:16:50.5141058+05:00"
+  },
+  "15": {
+    "InvoiceId": 15,
+    "AdjustmentAmount": 150,
+    "AdjustmentType": "\u002B",
+    "DiscountAmount": 2000,
+    "LastUpdated": "2026-03-10T17:49:06.6325081+05:00"
+  },
+  "30": {
+    "InvoiceId": 30,
+    "AdjustmentAmount": 0,
+    "AdjustmentType": "\u002B",
+    "DiscountAmount": 0,
+    "LastUpdated": "2025-10-29T01:30:15.7637173+05:00"
+  },
+  "31": {
+    "InvoiceId": 31,
+    "AdjustmentAmount": 0,
+    "AdjustmentType": "\u002B",
+    "DiscountAmount": 0,
+    "LastUpdated": "2025-10-29T01:33:59.400904+05:00"
+  },
+  "5": {
+    "InvoiceId": 5,
+    "AdjustmentAmount": 1000,
+    "AdjustmentType": "\u002B",
+    "DiscountAmount": 0,
+    "LastUpdated": "2025-11-26T17:20:22.0629312+05:00"
+  },
+  "6": {
+    "InvoiceId": 6,
+    "AdjustmentAmount": 1000,
+    "AdjustmentType": "-",
+    "DiscountAmount": 0,
+    "LastUpdated": "2025-11-26T17:36:32.4560391+05:00"
+  },
+  "7": {
+    "InvoiceId": 7,
+    "AdjustmentAmount": 2000,
+    "AdjustmentType": "\u002B",
+    "DiscountAmount": 0,
+    "LastUpdated": "2025-12-24T13:16:55.8557819+05:00"
+  },
+  "10": {
+    "InvoiceId": 10,
+    "AdjustmentAmount": 100,
+    "AdjustmentType": "\u002B",
+    "DiscountAmount": 0,
+    "LastUpdated": "2026-02-12T18:45:56.3055977+05:00"
+  },
+  "12": {
+    "InvoiceId": 12,
+    "AdjustmentAmount": 20000,
+    "AdjustmentType": "\u002B",
+    "DiscountAmount": 0,
+    "LastUpdated": "2025-12-24T13:18:32.8913994+05:00"
+  },
+  "14": {
+    "InvoiceId": 14,
+    "AdjustmentAmount": 1020,
+    "AdjustmentType": "\u002B",
+    "DiscountAmount": 20000,
+    "LastUpdated": "2026-02-18T14:47:41.0693538+05:00"
+  },
+  "16": {
+    "InvoiceId": 16,
+    "AdjustmentAmount": 2000,
+    "AdjustmentType": "\u002B",
+    "DiscountAmount": 0,
+    "LastUpdated": "2025-12-15T14:03:11.134796+05:00"
+  },
+  "17": {
+    "InvoiceId": 17,
+    "AdjustmentAmount": 2000,
+    "AdjustmentType": "\u002B",
+    "DiscountAmount": 0,
+    "LastUpdated": "2025-12-24T13:12:44.0451467+05:00"
+  },
+  "19": {
+    "InvoiceId": 19,
+    "AdjustmentAmount": 1000,
+    "AdjustmentType": "\u002B",
+    "DiscountAmount": 1000,
+    "LastUpdated": "2026-02-13T13:26:26.8085144+05:00"
+  },
+  "8": {
+    "InvoiceId": 8,
+    "AdjustmentAmount": 1000,
+    "AdjustmentType": "\u002B",
+    "DiscountAmount": 3000,
+    "LastUpdated": "2026-02-13T17:10:14.5865136+05:00"
+  },
+  "20": {
+    "InvoiceId": 20,
+    "AdjustmentAmount": 3500,
+    "AdjustmentType": "-",
+    "DiscountAmount": 20000,
+    "LastUpdated": "2026-02-13T13:22:10.0389085+05:00"
+  },
+  "21": {
+    "InvoiceId": 21,
+    "AdjustmentAmount": 2100,
+    "AdjustmentType": "\u002B",
+    "DiscountAmount": 15000,
+    "LastUpdated": "2026-02-13T17:11:49.0806343+05:00"
+  }
+}

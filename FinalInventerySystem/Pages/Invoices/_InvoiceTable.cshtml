@@ -1,0 +1,346 @@
+﻿@* @model IEnumerable<FinalInventerySystem.Models.Invoice>
+
+<div id="invoiceTableContainer" class="card shadow-lg border-0 rounded-3 mt-4">
+    <div class="card-header bg-primary text-white">
+
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-bordered table-hover align-middle text-center mb-0">
+            <thead class="table-primary">
+                <tr>
+                    <th style="width: 70px;">ID</th>
+                    <th>Customer</th>
+                    <th>Phone</th>
+                    <th>Address</th>
+                    <th>Total</th>
+                    <th style="width: 260px; text-align: left;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr><td colspan="6" class="text-center text-muted">No invoices found</td></tr>
+                }
+                else
+                {
+                    foreach (var invoice in Model)
+                    {
+                        <tr>
+                            <td>@invoice.Id</td>
+                            <td>@invoice.CustomerName</td>
+                            <td>@invoice.Phone</td>
+                            <td>@invoice.Address</td>
+                            <td class="fw-bold text-success">
+                                Rs. @string.Format("{0:0,0}", invoice.TotalAmount)
+                            </td>
+                            <td class="text-start">
+                                <div class="d-flex gap-2">
+                                    <a asp-page="Details" asp-route-id="@invoice.Id"
+                                       class="btn btn-info btn-sm shadow-sm">
+                                        <i class="bi bi-eye"></i> Details
+                                    </a>
+                                    <a asp-page="Edit" asp-route-id="@invoice.Id"
+                                       class="btn btn-warning btn-sm shadow-sm">
+                                        <i class="bi bi-pencil-square"></i> Edit
+                                    </a>
+                                    <a asp-page="Delete" asp-route-id="@invoice.Id"
+                                       class="btn btn-danger btn-sm shadow-sm">
+                                        <i class="bi bi-trash"></i> Delete
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ✅ Pagination -->
+<nav class="mt-3">
+    <ul class="pagination justify-content-center">
+        @{
+            var pageIndex = (int)ViewData["PageIndex"];
+            var totalPages = (int)ViewData["TotalPages"];
+        }
+
+        <li class="page-item @(pageIndex == 1 ? "disabled" : "")">
+            <a class="page-link" href="#" data-page="@(pageIndex - 1)">Previous</a>
+        </li>
+
+        @for (int i = 1; i <= totalPages; i++)
+        {
+            <li class="page-item @(i == pageIndex ? "active" : "")">
+                <a class="page-link" href="#" data-page="@i">@i</a>
+            </li>
+        }
+
+        <li class="page-item @(pageIndex == totalPages ? "disabled" : "")">
+            <a class="page-link" href="#" data-page="@(pageIndex + 1)">Next</a>
+        </li>
+    </ul>
+</nav>
+
+<style>
+    /* ✅ Table Borders */
+    .table-bordered th,
+    .table-bordered td {
+        border: 1px solid #dee2e6 !important;
+        vertical-align: middle;
+    }
+
+    /* ✅ Table Head */
+    thead.table-primary th {
+        background-color: #cfe2ff !important;
+        font-weight: 600;
+    }
+
+    /* ✅ Buttons */
+    .btn {
+        min-width: 85px;
+        font-weight: 500;
+    }
+
+        .btn i {
+            margin-right: 4px;
+        }
+
+    .btn-info {
+        background-color: #0dcaf0;
+        border: none;
+        color: #000;
+    }
+
+        .btn-info:hover {
+            background-color: #0bb1d4;
+            color: #fff;
+        }
+
+    .btn-warning {
+        background-color: #ffc107;
+        border: none;
+        color: #000;
+    }
+
+        .btn-warning:hover {
+            background-color: #e0a800;
+            color: #fff;
+        }
+
+    .btn-danger {
+        background-color: #dc3545;
+        border: none;
+    }
+
+        .btn-danger:hover {
+            background-color: #bb2d3b;
+        }
+</style>
+
+ *@
+
+@model IEnumerable<FinalInventerySystem.Models.Invoice>
+
+<div id="invoiceTableContainer" class="card shadow-lg border-0 rounded-3 mt-4">
+    <div class="card-header bg-primary text-white">
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-bordered table-hover align-middle text-center mb-0">
+            <thead class="table-primary">
+                <tr>
+                    <th style="width: 70px;">ID</th>
+                    <th>Customer</th>
+                    <th>Phone</th>
+                    <th>Address</th>
+                    <th>Total</th>
+                    <th style="width: 260px; text-align: left;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr><td colspan="6" class="text-center text-muted">No invoices found</td></tr>
+                }
+                else
+                {
+                    foreach (var invoice in Model)
+                    {
+                        <tr>
+                            <td>@invoice.Id</td>
+                            <td>@invoice.CustomerName</td>
+                            <td>@invoice.Phone</td>
+                            <td>@invoice.Address</td>
+                            <td class="fw-bold text-success">
+                                Rs. @string.Format("{0:0,0}", invoice.TotalAmount)
+                            </td>
+                            <td class="text-start">
+                                <div class="d-flex gap-2">
+                                    <a asp-page="Details" asp-route-id="@invoice.Id"
+                                       class="btn btn-info btn-sm shadow-sm">
+                                        <i class="bi bi-eye"></i> Details
+                                    </a>
+                                    <a asp-page="Edit" asp-route-id="@invoice.Id"
+                                       class="btn btn-warning btn-sm shadow-sm">
+                                        <i class="bi bi-pencil-square"></i> Edit
+                                    </a>
+                                    <a asp-page="Delete" asp-route-id="@invoice.Id"
+                                       class="btn btn-danger btn-sm shadow-sm">
+                                        <i class="bi bi-trash"></i> Delete
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ✅ UPDATED PAGINATION - Advanced Smart Paging -->
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+        @{
+            var pageIndex = (int)ViewData["PageIndex"];
+            var totalPages = (int)ViewData["TotalPages"];
+            var totalCount = ViewData["TotalCount"] as int? ?? 0;
+
+            // ✅ Smart paging logic directly here
+            var pages = new List<dynamic>();
+
+            // Always show first page
+            pages.Add(new { Number = 1, IsEllipsis = false });
+
+            // Calculate range around current page
+            int startPage = Math.Max(2, pageIndex - 1);
+            int endPage = Math.Min(totalPages - 1, pageIndex + 1);
+
+            // Add ellipsis after first page if needed
+            if (startPage > 2)
+            {
+                pages.Add(new { Number = 0, IsEllipsis = true });
+            }
+
+            // Add pages around current page
+            for (int i = startPage; i <= endPage; i++)
+            {
+                pages.Add(new { Number = i, IsEllipsis = false });
+            }
+
+            // Add ellipsis before last page if needed
+            if (endPage < totalPages - 1)
+            {
+                pages.Add(new { Number = 0, IsEllipsis = true });
+            }
+
+            // Always show last page if there is more than 1 page
+            if (totalPages > 1)
+            {
+                pages.Add(new { Number = totalPages, IsEllipsis = false });
+            }
+        }
+
+        <!-- Previous Button -->
+        <li class="page-item @(pageIndex == 1 ? "disabled" : "")">
+            <a class="page-link" href="#" data-page="@(pageIndex - 1)" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+
+        <!-- Smart Page Numbers -->
+        @foreach (var pg in pages)
+        {
+            if (pg.IsEllipsis)
+            {
+                <li class="page-item disabled">
+                    <span class="page-link">...</span>
+                </li>
+            }
+            else
+            {
+                <li class="page-item @(pg.Number == pageIndex ? "active" : "")">
+                    <a class="page-link" href="#" data-page="@pg.Number">
+                        @pg.Number
+                    </a>
+                </li>
+            }
+        }
+
+        <!-- Next Button -->
+        <li class="page-item @(pageIndex == totalPages ? "disabled" : "")">
+            <a class="page-link" href="#" data-page="@(pageIndex + 1)" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+    </ul>
+
+    <!-- Page Info -->
+    <div class="text-center text-muted small mt-2">
+        Page @pageIndex of @totalPages • Total @totalCount invoices
+    </div>
+</nav>
+
+<style>
+    .table-bordered th,
+    .table-bordered td {
+        border: 1px solid #dee2e6 !important;
+        vertical-align: middle;
+    }
+
+    thead.table-primary th {
+        background-color: #cfe2ff !important;
+        font-weight: 600;
+    }
+
+    .btn {
+        min-width: 85px;
+        font-weight: 500;
+    }
+
+        .btn i {
+            margin-right: 4px;
+        }
+
+    .btn-info {
+        background-color: #0dcaf0;
+        border: none;
+        color: #000;
+    }
+
+        .btn-info:hover {
+            background-color: #0bb1d4;
+            color: #fff;
+        }
+
+    .btn-warning {
+        background-color: #ffc107;
+        border: none;
+        color: #000;
+    }
+
+        .btn-warning:hover {
+            background-color: #e0a800;
+            color: #fff;
+        }
+
+    .btn-danger {
+        background-color: #dc3545;
+        border: none;
+    }
+
+        .btn-danger:hover {
+            background-color: #bb2d3b;
+        }
+
+    .pagination .page-link {
+        border-radius: 8px;
+        margin: 0 3px;
+    }
+
+    .pagination .active .page-link {
+        background-color: #007bff;
+        border-color: #007bff;
+        color: #fff;
+    }
+</style>

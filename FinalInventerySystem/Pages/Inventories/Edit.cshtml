@@ -1,0 +1,55 @@
+﻿@page
+@model FinalInventerySystem.Pages.Inventories.EditModel
+@{
+    ViewData["Title"] = "Edit Item";
+}
+
+<div class="container mt-4">
+    <div class="card shadow-lg border-0 rounded-3">
+        <div class="card-header bg-warning text-dark">
+            <h4 class="mb-0"><i class="bi bi-pencil-square"></i> Edit Item</h4>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                <input type="hidden" asp-for="Inventory.Id" />
+
+                <div class="mb-3">
+                    <label asp-for="Inventory.Code" class="form-label fw-bold"></label>
+                    <input asp-for="Inventory.Code" class="form-control" />
+                    <span asp-validation-for="Inventory.Code" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Inventory.Name" class="form-label fw-bold"></label>
+                    <input asp-for="Inventory.Name" class="form-control" />
+                    <span asp-validation-for="Inventory.Name" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Inventory.BasePrice" class="form-label fw-bold"></label>
+                    <input asp-for="Inventory.BasePrice" class="form-control" />
+                    <span asp-validation-for="Inventory.BasePrice" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Inventory.Quantity" class="form-label fw-bold">Stock</label>
+                    <input asp-for="Inventory.Quantity" class="form-control" />
+                    <span asp-validation-for="Inventory.Quantity" class="text-danger"></span>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <a asp-page="Index" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Back
+                    </a>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="bi bi-save"></i> Update Item
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

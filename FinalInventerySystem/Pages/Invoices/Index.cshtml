@@ -1,0 +1,72 @@
+﻿
+@page
+@model FinalInventerySystem.Pages.Invoices.IndexModel
+@{
+    ViewData["Title"] = "Invoices";
+}
+
+<div class="container mt-4">
+    <div class="card shadow-lg border-0 rounded-3">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">🧾 Invoice Management</h4>
+            <div class="input-group w-25">
+                <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
+                <input type="text" id="searchInput" class="form-control" placeholder="Search by customer name..." autocomplete="off">
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div class="d-flex justify-content-end mb-3">
+                <!-- ✅ returnPage ADD KARO -->
+                <a asp-page="Create" asp-route-returnPage="@Model.CurrentPage" class="btn btn-success">
+                    <i class="bi bi-plus-circle"></i> Create New Invoice
+                </a>
+            </div>
+
+            <div id="invoiceTableContainer">
+                @await Html.PartialAsync("_InvoiceTable", Model.Invoices, new ViewDataDictionary(ViewData) {
+                { "PageIndex", Model.CurrentPage },
+                                { "TotalPages", Model.TotalPages }
+                                })
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function loadInvoices(searchQuery, pageIndex) {
+            $.get("/Invoices/Index", { searchString: searchQuery, pageIndex: pageIndex }, function (data) {
+                let tableHtml = $(data).find("#invoiceTableContainer").html();
+                $("#invoiceTableContainer").html(tableHtml);
+            });
+        }
+
+        $("#searchInput").on("keyup", function () {
+            loadInvoices($(this).val(), 1);
+        });
+
+        $(document).on("click", ".pagination a", function (e) {
+            e.preventDefault();
+            let pageIndex = $(this).data("page");
+            let query = $("#searchInput").val();
+            loadInvoices(query, pageIndex);
+        });
+    </script>
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

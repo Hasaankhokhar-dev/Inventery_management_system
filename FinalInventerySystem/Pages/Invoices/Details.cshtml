@@ -1,0 +1,825 @@
+﻿
+@page "{id:int}"
+@model FinalInventerySystem.Pages.Invoices.DetailsModel
+@{
+    ViewData["Title"] = "Invoice Details";
+}
+
+<style>
+    .container {
+        max-width: 1000px;
+        margin: auto;
+    }
+
+    /* Compact Header */
+    .compact-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        padding: 12px 15px;
+        background: linear-gradient(90deg, #007bff, #0056b3);
+        color: white;
+        border-radius: 6px;
+    }
+
+    .shop-info h4 {
+        margin: 0;
+        font-weight: 700;
+        font-size: 1.2rem;
+    }
+
+    .shop-info p {
+        margin: 2px 0;
+        font-size: 11px;
+    }
+
+    /* Customer Info - Single Row */
+    .customer-info-single-row {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 15px;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 6px;
+        border-left: 4px solid #007bff;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .customer-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 13px;
+    }
+
+    .customer-label {
+        font-weight: bold;
+        color: #495057;
+        white-space: nowrap;
+    }
+
+    .customer-value {
+        color: #333;
+        white-space: nowrap;
+    }
+
+    .divider {
+        color: #dee2e6;
+        font-weight: normal;
+    }
+
+    /* Compact Table */
+    .compact-table {
+        font-size: 13px;
+    }
+
+    .compact-table th {
+        padding: 6px 8px !important;
+        background: #343a40 !important;
+        color: white;
+    }
+
+    .compact-table td {
+        padding: 4px 6px !important;
+        vertical-align: middle;
+    }
+
+    /* Compact Total Section */
+    .total-section-compact {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-top: 15px;
+        padding: 12px 15px;
+        background: #e7f3ff;
+        border-radius: 6px;
+        border: 2px solid #007bff;
+        width: 300px;
+        min-width: 300px;
+        margin-left: auto;
+    }
+
+    .total-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 0;
+    }
+
+    .total-row:not(:last-child) {
+        border-bottom: 1px dashed #007bff;
+    }
+
+    .total-label {
+        font-size: 13px;
+        font-weight: bold;
+        color: #007bff;
+        margin: 0;
+    }
+
+    .total-amount {
+        font-size: 13px;
+        font-weight: bold;
+        color: #28a745;
+        margin: 0;
+    }
+
+    .final-total {
+        font-size: 15px;
+        font-weight: bold;
+        color: #dc3545;
+    }
+
+    /* ✅ NEW: Payment Received Row Style */
+    .payment-row {
+        border-bottom: 2px dashed #28a745 !important;
+        background: #f0fff0;
+        padding: 8px 0 !important;
+        border-radius: 4px;
+    }
+
+    .payment-label {
+        font-size: 13px;
+        font-weight: bold;
+        color: #28a745 !important;
+        margin: 0;
+    }
+
+    .payment-amount {
+        font-size: 13px;
+        font-weight: bold;
+        color: #28a745 !important;
+        margin: 0;
+    }
+
+    /* ============================================
+       PERFECTLY BALANCED PRINT STYLES 
+       EPSON TM-T188IV - WITH PAYMENT RECEIVED
+       ============================================ */
+    .print-container {
+        display: none;
+        font-family: Arial, Helvetica, sans-serif;
+        background: white;
+        width: 72mm;
+        max-width: 72mm;
+        margin: 0 auto;
+        padding: 2.5mm;
+        box-sizing: border-box;
+    }
+
+    @@media print {
+        /* Hide layout navbar and header */
+        header, .navbar, .navbar-custom, .no-print, footer, .btn, .progress {
+            display: none !important;
+        }
+        
+        /* Show print container */
+        .print-container {
+            display: block !important;
+            margin: 0 auto !important;
+            padding: 2.5mm !important;
+            background: white !important;
+            font-size: 11px !important;
+            width: 72mm !important;
+            max-width: 72mm !important;
+            font-family: Arial, Helvetica, sans-serif !important;
+            line-height: 1.3 !important;
+            box-sizing: border-box !important;
+        }
+        
+        body {
+            margin: 0 !important;
+            padding: 0 !important;
+            background: white !important;
+            font-size: 11px !important;
+            line-height: 1.3 !important;
+        }
+        
+        /* Print table */
+        .print-table {
+            width: 100% !important;
+            max-width: 100% !important;
+            table-layout: fixed !important;
+            border-collapse: collapse !important;
+            font-size: 11px !important;
+            line-height: 1.2 !important;
+            margin: 5px 0 !important;
+        }
+        
+        .print-table th {
+            padding: 6px 4px !important;
+            border: 0.8px solid #000 !important;
+            background: #333 !important;
+            color: white !important;
+            font-size: 11px !important;
+            font-weight: bold !important;
+        }
+        
+        .print-table td {
+            padding: 5px 4px !important;
+            border: 0.8px solid #000 !important;
+            font-size: 11px !important;
+            line-height: 1.2 !important;
+            vertical-align: middle;
+            word-wrap: break-word !important;
+        }
+        
+        .print-table td:nth-child(2) {
+            text-align: center !important;
+            font-weight: bold !important;
+        }
+        
+        .print-table td:last-child {
+            text-align: right !important;
+            font-weight: bold !important;
+        }
+        
+        /* Column widths */
+        .print-table th:first-child,
+        .print-table td:first-child {
+            width: 36mm !important;
+            max-width: 36mm !important;
+        }
+        
+        .print-table th:nth-child(2),
+        .print-table td:nth-child(2) {
+            width: 10mm !important;
+            max-width: 10mm !important;
+        }
+        
+        .print-table th:last-child,
+        .print-table td:last-child {
+            width: 24mm !important;
+            max-width: 24mm !important;
+        }
+        
+        /* Print customer */
+        .print-customer {
+            font-size: 11px !important;
+            line-height: 1.4 !important;
+            margin-bottom: 8px !important;
+            padding: 8px !important;
+            background: #f5f5f5 !important;
+            border-left: 4px solid #333 !important;
+            border-radius: 2px !important;
+            word-wrap: break-word !important;
+        }
+        
+        /* Print header */
+        .print-header {
+            margin-bottom: 8px !important;
+            text-align: center !important;
+        }
+        
+        .print-header h3 {
+            font-size: 14px !important;
+            font-weight: bold !important;
+            margin: 0 0 4px 0 !important;
+            letter-spacing: 0.5px !important;
+        }
+        
+        .print-header p {
+            font-size: 11px !important;
+            margin: 2px 0 !important;
+        }
+        
+        /* Print totals - WITH PAYMENT RECEIVED */
+        .print-totals {
+            margin-top: 10px !important;
+            padding: 8px !important;
+            border-top: 2px double #000 !important;
+            font-size: 11px !important;
+            background: #fafafa !important;
+        }
+        
+        .print-totals div {
+            padding: 4px 0 !important;
+        }
+        
+        .print-totals div.payment-row-print {
+            border-bottom: 1px dashed #28a745 !important;
+            color: #28a745 !important;
+            font-weight: bold !important;
+        }
+        
+        .print-totals div:last-child {
+            font-size: 15px !important;
+            font-weight: bold !important;
+            border-top: 2px solid #000 !important;
+            margin-top: 6px !important;
+            padding-top: 8px !important;
+            color: #000 !important;
+        }
+        
+        /* Print footer */
+        .print-footer {
+            font-size: 10px !important;
+            text-align: center !important;
+            margin-top: 8px !important;
+            padding-top: 6px !important;
+            border-top: 0.8px solid #000 !important;
+            font-style: italic !important;
+        }
+    }
+
+    /* Progress Bar */
+    .progress {
+        height: 5px;
+        background-color: #f0f0f0;
+        border-radius: 3px;
+        overflow: hidden;
+        margin-top: 10px;
+    }
+    
+    .progress-bar {
+        height: 100%;
+        background-color: #007bff;
+        transition: width 0.3s ease;
+    }
+    
+    .progress-bar-striped {
+        background-image: linear-gradient(45deg, rgba(255,255,255,.15) 25%, transparent 25%, transparent 50%, rgba(255,255,255,.15) 50%, rgba(255,255,255,.15) 75%, transparent 75%, transparent);
+        background-size: 1rem 1rem;
+    }
+    
+    .progress-bar-animated {
+        animation: progress-bar-stripes 1s linear infinite;
+    }
+    
+    @@keyframes progress-bar-stripes {
+        from { background-position: 1rem 0; }
+        to { background-position: 0 0; }
+    }
+    
+    .btn-compact {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+    }
+    
+    .print-status {
+        font-size: 11px;
+        color: #6c757d;
+    }
+</style>
+
+<div class="container mt-3">
+    <!-- Screen View -->
+    <div class="no-print">
+        <!-- Compact Header -->
+        <div class="compact-header">
+            <div class="shop-info">
+                <h4>AL-Madina Electric & Solar House</h4>
+                <p>Zeeshan: 0312-2037249 | Shaukat: 0342-1417132</p>
+            </div>
+            <div>
+                <span class="badge bg-light text-dark">Invoice #@Model.Invoice.Id</span>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body p-3">
+                <!-- Compact Customer Info - Single Row -->
+                <div class="customer-info-single-row">
+                    <div class="customer-item">
+                        <span class="customer-label">Customer:</span>
+                        <span class="customer-value">@Model.Invoice.CustomerName</span>
+                    </div>
+                    <span class="divider">|</span>
+                    <div class="customer-item">
+                        <span class="customer-label">Phone:</span>
+                        <span class="customer-value">@Model.Invoice.Phone</span>
+                    </div>
+                    <span class="divider">|</span>
+                    <div class="customer-item">
+                        <span class="customer-label">Address:</span>
+                        <span class="customer-value">@Model.Invoice.Address</span>
+                    </div>
+                    <span class="divider">|</span>
+                    <div class="customer-item">
+                        <span class="customer-label">Date:</span>
+                        <span class="customer-value">@Model.Invoice.CreatedAt.ToString("dd/MM/yyyy hh:mm tt")</span>
+                    </div>
+                </div>
+
+                <!-- Compact Invoice Table -->
+                <div class="table-responsive">
+                    <table class="table table-bordered compact-table">
+                        <thead class="table-dark">
+                            <tr>
+                                <th style="width:50%">Product</th>
+                                <th style="width:15%">Qty</th>
+                                <th style="width:20%">Unit Price</th>
+                                <th style="width:15%">Sub Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.Invoice.InvoiceItems)
+                            {
+                                <tr>
+                                    <td>@item.Inventory.Name</td>
+                                    <td class="text-center">@item.Quantity</td>
+                                    <td class="text-end">Rs. @item.UnitPrice.ToString("N0")</td>
+                                    <td class="text-end fw-bold">Rs. @item.SubTotal.ToString("N0")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- ✅ UPDATED: Compact Total Section with Payment Received -->
+                <div class="total-section-compact">
+                    <!-- Items Total -->
+                    <div class="total-row">
+                        <span class="total-label">Items Total:</span>
+                        <span class="total-amount">
+                            Rs. @Model.Invoice.InvoiceItems.Sum(i => i.SubTotal).ToString("N0")
+                        </span>
+                    </div>
+                    
+                    <!-- Adjustment -->
+                    <div class="total-row">
+                        <span class="total-label">Adjustment:</span>
+                        <span class="total-amount">
+                            @if (Model.AdjustmentAmount > 0)
+                            {
+                                @(Model.AdjustmentType == "+" ? "+" : "-") <text>Rs. @Model.AdjustmentAmount.ToString("N0")</text>
+                            }
+                            else
+                            {
+                                <text>Rs. 0</text>
+                            }
+                        </span>
+                    </div>
+                    
+                    <!-- ✅ NEW: Payment Received Row -->
+                    @if (Model.PaymentReceived > 0)
+                    {
+                        <div class="total-row payment-row">
+                            <span class="payment-label">
+                                <i class="bi bi-cash-stack" style="color: #28a745;"></i> Payment Received:
+                            </span>
+                            <span class="payment-amount">- Rs. @Model.PaymentReceived.ToString("N0")</span>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="total-row payment-row">
+                            <span class="payment-label">
+                                <i class="bi bi-cash-stack" style="color: #28a745;"></i> Payment Received:
+                            </span>
+                            <span class="payment-amount">Rs. 0</span>
+                        </div>
+                    }
+                    
+                    <!-- Final Total -->
+                    <div class="total-row">
+                        <span class="total-label">Final Total:</span>
+                        <span class="total-amount final-total">Rs. @Model.Invoice.TotalAmount.ToString("N0")</span>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="mt-3 d-flex justify-content-between align-items-center">
+                    <div>
+                        <a asp-page="Index" class="btn btn-secondary btn-sm">
+                            <i class="bi bi-arrow-left"></i> Back
+                        </a>
+                        <a asp-page="Edit" asp-route-id="@Model.Invoice.Id" class="btn btn-warning btn-sm">
+                            <i class="bi bi-pencil"></i> Edit
+                        </a>
+                    </div>
+                    <div>
+                        <button type="button" id="printBtn" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-printer"></i> Print
+                        </button>
+                        <a href="@Url.Page("Details", "DownloadPdf", new { id = Model.Invoice.Id })"
+                           class="btn btn-outline-danger btn-sm">
+                            <i class="bi bi-file-pdf"></i> PDF
+                        </a>
+                        <a asp-page="Delete" asp-route-id="@Model.Invoice.Id" class="btn btn-outline-danger btn-sm">
+                            <i class="bi bi-trash"></i> Delete
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Progress Bar and Status -->
+                <div id="printProgressContainer" style="display: none; margin-top: 15px;">
+                    <div class="progress">
+                        <div id="printProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" 
+                             role="progressbar" style="width: 0%;"></div>
+                    </div>
+                    <div id="printStatus" class="print-status text-center mt-1"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================
+         PERFECTLY BALANCED PRINT VIEW 
+         WITH PAYMENT RECEIVED
+         ============================================ -->
+    <div class="print-container">
+        <!-- Header -->
+        <div class="print-header">
+            <div style="text-align: center; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1.5px solid #000;">
+                <h3 style="margin: 0 0 4px 0; font-size: 15px; font-weight: bold;">AL-Madina Electric</h3>
+                <p style="margin: 2px 0; font-size: 11px;">Zeeshan: 0312-2037249</p>
+                <p style="margin: 2px 0; font-size: 11px;">Shaukat: 0342-1417132</p>
+            </div>
+        </div>
+
+        <!-- Customer Info -->
+        <div class="print-customer" style="margin-bottom: 10px; font-size: 11px; padding: 8px; background: #f5f5f5; border-left: 4px solid #333;">
+            <div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px;">
+                <span style="font-weight: bold;">Customer:</span>
+                <span id="printCustomerName" style="font-weight: normal;"></span>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 5px;">
+                <span><span style="font-weight: bold;">Phone:</span> <span id="printCustomerPhone"></span></span>
+                <span><span style="font-weight: bold;">Date:</span> <span id="printInvoiceDate"></span></span>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px;">
+                <span style="font-weight: bold;">Address:</span>
+                <span id="printCustomerAddress" style="font-weight: normal;"></span>
+            </div>
+        </div>
+
+        <!-- Items Table -->
+        <table class="print-table" style="width: 100%; table-layout: fixed; border-collapse: collapse; font-size: 11px;">
+            <thead>
+                <tr style="background: #333; color: white;">
+                    <th style="width: 36mm; padding: 6px 4px; border: 0.8px solid #000; text-align: left;">Product</th>
+                    <th style="width: 10mm; padding: 6px 4px; border: 0.8px solid #000; text-align: center;">Qty</th>
+                    <th style="width: 24mm; padding: 6px 4px; border: 0.8px solid #000; text-align: right;">Sub Total</th>
+                </tr>
+            </thead>
+            <tbody style="font-size: 11px;">
+                <!-- Items will be injected via JavaScript -->
+            </tbody>
+        </table>
+
+        <!-- Totals Section - WITH PAYMENT RECEIVED -->
+        <div class="print-totals" style="display: none; border-top: 2px double #000; margin-top: 12px; padding-top: 8px; background: #fafafa;">
+        </div>
+        
+        <!-- Page Number -->
+        <div class="print-page-number" style="text-align: center; margin-top: 8px; font-size: 10px; padding-top: 4px; border-top: 0.5px dashed #999; color: #555;">
+        </div>
+        
+        <!-- Thank you note -->
+        <div class="print-footer" style="text-align: center; margin-top: 8px; font-size: 10px; border-top: 0.8px solid #000; padding-top: 6px; font-style: italic;">
+            Thank you for your business!
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    
+    <script>
+        $(document).ready(function() {
+            
+            // =============================================
+            // EPSON TM-T188IV THERMAL PRINTER SETTINGS
+            // =============================================
+            const CHUNK_SIZE = 29;
+            const PRINTER_DELAY = 3000;
+            
+            // =============================================
+            // PRINT FUNCTION - WITH PAYMENT RECEIVED
+            // =============================================
+            $("#printBtn").on("click", async function() {
+                $(this).prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Printing...');
+                
+                $('#printProgressContainer').show();
+                $('#printProgressBar').css('width', '0%');
+                $('#printStatus').text('Preparing invoice data...');
+                
+                try {
+                    const items = @Html.Raw(Json.Serialize(Model.Invoice.InvoiceItems.Select(i => new {
+                        name = i.Inventory?.Name ?? "Unknown Product",
+                        quantity = i.Quantity,
+                        subTotal = i.SubTotal
+                    })));
+                    
+                    const invoiceData = {
+                        id: @Model.Invoice.Id,
+                        customerName: '@Model.Invoice.CustomerName'.replace(/'/g, "\\'"),
+                        phone: '@Model.Invoice.Phone'.replace(/'/g, "\\'"),
+                        address: '@Model.Invoice.Address'.replace(/'/g, "\\'"),
+                        date: '@Model.Invoice.CreatedAt.ToString("dd/MM/yyyy")',
+                        time: '@Model.Invoice.CreatedAt.ToString("hh:mm tt")',
+                        itemsTotal: @Model.Invoice.InvoiceItems.Sum(i => i.SubTotal),
+                        adjustmentAmount: @Model.AdjustmentAmount,
+                        adjustmentType: '@Model.AdjustmentType',
+                        paymentReceived: @Model.PaymentReceived,  // ✅ NEW: Payment Received
+                        finalTotal: @Model.Invoice.TotalAmount
+                    };
+                    
+                    const chunks = [];
+                    for (let i = 0; i < items.length; i += CHUNK_SIZE) {
+                        chunks.push(items.slice(i, i + CHUNK_SIZE));
+                    }
+                    
+                    const totalChunks = chunks.length;
+                    const totalItems = items.length;
+                    
+                    $('#printStatus').text(`Total ${totalItems} items - Printing ${totalChunks} pages...`);
+                    
+                    $('.no-print').hide();
+                    $('header, .navbar, footer').hide();
+                    
+                    for (let i = 0; i < chunks.length; i++) {
+                        const pageNum = i + 1;
+                        const isFirstPage = (i === 0);
+                        const isLastPage = (i === chunks.length - 1);
+                        
+                        const progressPercent = (i / totalChunks) * 100;
+                        $('#printProgressBar').css('width', progressPercent + '%');
+                        $('#printStatus').text(`Printing page ${pageNum} of ${totalChunks}...`);
+                        
+                        preparePrintChunk(chunks[i], invoiceData, pageNum, totalChunks, isFirstPage, isLastPage);
+                        
+                        $('.print-container').show();
+                        await sleep(300);
+                        window.print();
+                        
+                        if (i < chunks.length - 1) {
+                            $('#printStatus').text(`Page ${pageNum} printed. Waiting for printer...`);
+                            await sleep(PRINTER_DELAY);
+                        }
+                    }
+                    
+                    $('#printProgressBar').css('width', '100%');
+                    $('#printStatus').text(`✅ Print complete! ${totalItems} items on ${totalChunks} pages.`);
+                    
+                } catch (error) {
+                    console.error('Print error:', error);
+                    $('#printStatus').text(`❌ Print error: ${error.message}`);
+                    alert('❌ Print failed: ' + error.message);
+                } finally {
+                    setTimeout(() => {
+                        $('.no-print').show();
+                        $('header, .navbar, footer').show();
+                        $('.print-container').hide();
+                        $("#printBtn").prop('disabled', false).html('<i class="bi bi-printer"></i> Print');
+                        
+                        setTimeout(() => {
+                            $('#printProgressContainer').hide();
+                        }, 3000);
+                    }, 500);
+                }
+            });
+            
+            // =============================================
+            // PREPARE PRINT CHUNK - WITH PAYMENT RECEIVED
+            // =============================================
+            function preparePrintChunk(itemsChunk, invoiceData, pageNum, totalPages, isFirstPage, isLastPage) {
+                
+                // 1. HEADER
+                if (isFirstPage) {
+                    $('.print-header').html(`
+                        <div style="text-align: center; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1.5px solid #000;">
+                            <h3 style="margin: 0 0 4px 0; font-size: 16px; font-weight: bold;">AL-Madina Electric</h3>
+                            <p style="margin: 2px 0; font-size: 11px;">Zeeshan: 0312-2037249 | Shaukat: 0342-1417132</p>
+                            <p style="margin: 4px 0 0 0; font-size: 12px; font-weight: bold;">Invoice #${invoiceData.id}</p>
+                            <p style="margin: 2px 0 0 0; font-size: 10px; color: #555;">${invoiceData.date} ${invoiceData.time}</p>
+                        </div>
+                    `);
+                } else {
+                    $('.print-header').html(`
+                        <div style="text-align: center; margin-bottom: 6px; border-bottom: 1px solid #000; padding-bottom: 4px;">
+                            <span style="font-size: 12px; font-weight: bold;">AL-Madina Electric (Continued)</span>
+                            <span style="font-size: 11px; margin-left: 8px;">Invoice #${invoiceData.id}</span>
+                            <p style="margin: 2px 0 0 0; font-size: 10px; color: #666;">Page ${pageNum} of ${totalPages}</p>
+                        </div>
+                    `);
+                }
+                
+                // 2. CUSTOMER INFO
+                if (isFirstPage) {
+                    $('#printCustomerName').text(invoiceData.customerName);
+                    $('#printCustomerPhone').text(invoiceData.phone);
+                    $('#printInvoiceDate').text(invoiceData.date);
+                    $('#printCustomerAddress').text(invoiceData.address);
+                    $('.print-customer').show();
+                } else {
+                    $('.print-customer').html(`
+                        <div style="font-size: 11px; padding: 6px; background: #f5f5f5; border-left: 4px solid #333;">
+                            <span style="font-weight: bold;">Customer:</span> ${escapeHtml(invoiceData.customerName)}
+                            <span style="margin-left: 12px; color: #666;">(Continued - Page ${pageNum})</span>
+                        </div>
+                    `).show();
+                }
+                
+                // 3. TABLE ROWS
+                let tableRows = '';
+                itemsChunk.forEach((item) => {
+                    let productName = escapeHtml(item.name);
+                    if (productName.length > 28) {
+                        productName = productName.substring(0, 25) + '...';
+                    }
+                    
+                    tableRows += `<tr>
+                        <td style="padding: 6px 4px; border: 0.8px solid #000; word-wrap: break-word; font-size: 11px;">${productName}</td>
+                        <td style="padding: 6px 4px; border: 0.8px solid #000; text-align: center; font-weight: bold; font-size: 11px;">${item.quantity}</td>
+                        <td style="padding: 6px 4px; border: 0.8px solid #000; text-align: right; font-weight: bold; font-size: 11px;">Rs. ${formatNumber(item.subTotal)}</td>
+                    </tr>`;
+                });
+                
+                if (!isLastPage) {
+                    tableRows += `<tr>
+                        <td colspan="3" style="padding: 8px; border: 0.8px solid #000; text-align: center; font-size: 10px; font-style: italic; background: #f9f9f9; font-weight: bold; color: #0066cc;">
+                            ⬇ CONTINUED ON PAGE ${pageNum + 1} ⬇
+                        </td>
+                    </tr>`;
+                }
+                
+                $('.print-table tbody').html(tableRows);
+                
+                // 4. TOTALS - WITH PAYMENT RECEIVED
+                if (isLastPage) {
+                    const adjustmentText = invoiceData.adjustmentAmount > 0 
+                        ? `${invoiceData.adjustmentType === '+' ? '+' : '-'} Rs. ${formatNumber(invoiceData.adjustmentAmount)}`
+                        : 'Rs. 0';
+                    
+                    const paymentText = invoiceData.paymentReceived > 0
+                        ? `- Rs. ${formatNumber(invoiceData.paymentReceived)}`
+                        : 'Rs. 0';
+                    
+                    $('.print-totals').html(`
+                        <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px; padding: 2px 0;">
+                            <span style="font-weight: bold;">Items Total:</span>
+                            <span style="font-weight: bold;">Rs. ${formatNumber(invoiceData.itemsTotal)}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px; padding: 2px 0;">
+                            <span style="font-weight: bold;">Adjustment:</span>
+                            <span style="font-weight: bold; ${invoiceData.adjustmentAmount > 0 ? 'color: #0066cc;' : ''}">${adjustmentText}</span>
+                        </div>
+                        <!-- ✅ NEW: Payment Received Row in Print -->
+                        <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px; padding: 4px 0; border-bottom: 1px dashed #28a745; color: #28a745; font-weight: bold;">
+                            <span>💵 Payment Received:</span>
+                            <span>${paymentText}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 16px; font-weight: bold; margin-top: 8px; padding-top: 8px; border-top: 2.5px solid #000;">
+                            <span style="font-size: 16px;">FINAL TOTAL:</span>
+                            <span style="font-size: 18px; color: #000;">Rs. ${formatNumber(invoiceData.finalTotal)}</span>
+                        </div>
+                    `).show();
+                } else {
+                    $('.print-totals').hide().empty();
+                }
+                
+                // 5. PAGE NUMBER
+                const startItem = (pageNum - 1) * CHUNK_SIZE + 1;
+                const endItem = Math.min(pageNum * CHUNK_SIZE, (totalPages - 1) * CHUNK_SIZE + itemsChunk.length);
+                $('.print-page-number').html(`
+                    <span style="font-size: 10px;">Page ${pageNum} of ${totalPages}</span>
+                    <span style="font-size: 9px; margin-left: 10px; color: #777;">Items ${startItem}-${endItem}</span>
+                `);
+            }
+            
+            // =============================================
+            // UTILITY FUNCTIONS
+            // =============================================
+            
+            function sleep(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+            
+            function formatNumber(num) {
+                return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            }
+            
+            function escapeHtml(text) {
+                if (!text) return '';
+                return String(text)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#039;');
+            }
+            
+            // Reset print container
+            function resetPrintContainer() {
+                $('.print-header').html(`
+                    <div style="text-align: center; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1.5px solid #000;">
+                        <h3 style="margin: 0 0 4px 0; font-size: 15px; font-weight: bold;">AL-Madina Electric</h3>
+                        <p style="margin: 2px 0; font-size: 11px;">Zeeshan: 0312-2037249 | Shaukat: 0342-1417132</p>
+                    </div>
+                `);
+                $('.print-customer').empty();
+                $('.print-table tbody').empty();
+                $('.print-totals').hide().empty();
+                $('.print-page-number').empty();
+            }
+            
+            // Initialize
+            resetPrintContainer();
+        });
+    </script>
+}
+

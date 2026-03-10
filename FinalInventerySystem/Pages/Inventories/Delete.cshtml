@@ -1,0 +1,36 @@
+﻿@page
+@model FinalInventerySystem.Pages.Inventories.DeleteModel
+@{
+    ViewData["Title"] = "Delete Item";
+}
+
+<div class="d-flex justify-content-center align-items-center vh-100 bg-light">
+    <div class="card shadow-lg border-0 rounded-4" style="max-width: 500px; width: 100%;">
+        <div class="card-header bg-gradient bg-danger text-white text-center rounded-top-4">
+            <h4 class="mb-0"><i class="bi bi-exclamation-triangle-fill"></i> Delete Confirmation</h4>
+        </div>
+
+        <div class="card-body text-center">
+            <p class="fw-bold text-danger fs-5">⚠ Are you sure you want to delete this item?</p>
+
+            <div class="alert alert-warning text-start shadow-sm rounded-3">
+                <p><strong>🆔 Code:</strong> @Model.Inventory.Code</p>
+                <p><strong>📦 Name:</strong> @Model.Inventory.Name</p>
+                <p><strong>💰 Base Price:</strong> @Model.Inventory.BasePrice.ToString("N0")</p>
+                <p><strong>📊 Stock:</strong> @Model.Inventory.Quantity</p>
+            </div>
+
+            <form method="post" class="d-flex justify-content-center gap-3 mt-4">
+                <input type="hidden" asp-for="Inventory.Id" />
+
+                <a asp-page="Index" class="btn btn-outline-secondary px-4 rounded-pill">
+                    <i class="bi bi-arrow-left-circle"></i> Cancel
+                </a>
+
+                <button type="submit" class="btn btn-danger px-4 rounded-pill">
+                    <i class="bi bi-trash-fill"></i> Delete
+                </button>
+            </form>
+        </div>
+    </div>
+</div>

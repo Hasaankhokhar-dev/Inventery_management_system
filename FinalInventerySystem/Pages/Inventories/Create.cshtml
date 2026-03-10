@@ -1,0 +1,57 @@
+﻿@page
+@model FinalInventerySystem.Pages.Inventories.CreateModel
+@{
+    ViewData["Title"] = "Add New Item";
+}
+
+<div class="container mt-4">
+    <div class="card shadow-lg border-0 rounded-3">
+        <div class="card-header bg-success text-white">
+            <h4 class="mb-0"><i class="bi bi-plus-circle"></i> Add New Item</h4>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                <!-- ✅ HIDDEN FIELD ADD KARO -->
+                <input type="hidden" asp-for="ReturnPage" />
+
+                <div class="mb-3">
+                    <label asp-for="Inventory.Code" class="form-label fw-bold"></label>
+                    <input asp-for="Inventory.Code" class="form-control" placeholder="Enter item code" />
+                    <span asp-validation-for="Inventory.Code" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Inventory.Name" class="form-label fw-bold"></label>
+                    <input asp-for="Inventory.Name" class="form-control" placeholder="Enter item name" />
+                    <span asp-validation-for="Inventory.Name" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Inventory.BasePrice" class="form-label fw-bold"></label>
+                    <input asp-for="Inventory.BasePrice" class="form-control" placeholder="Enter base price" />
+                    <span asp-validation-for="Inventory.BasePrice" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Inventory.Quantity" class="form-label fw-bold">Stock</label>
+                    <input asp-for="Inventory.Quantity" class="form-control" placeholder="Enter stock quantity" />
+                    <span asp-validation-for="Inventory.Quantity" class="text-danger"></span>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <!-- ✅ BACK TO SAME PAGE -->
+                    <a asp-page="Index" asp-route-pageIndex="@Model.ReturnPage" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Back
+                    </a>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-save"></i> Save Item
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
