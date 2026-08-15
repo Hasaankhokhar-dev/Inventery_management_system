@@ -1,4 +1,3 @@
-
 using FinalInventerySystem.Models;
 using FinalInventerySystem.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -26,16 +25,68 @@ namespace FinalInventerySystem.Pages.Invoices
 
         public List<Inventory> AvailableInventories { get; set; } = new();
 
-        // ? SIRF YEH PROPERTY ADD KARO
         [BindProperty(SupportsGet = true)]
         public int ReturnPage { get; set; } = 1;
 
         public void OnGet(int? returnPage)
         {
             AvailableInventories = _context.Inventories.ToList();
-
-            // ? SIRF YEH LINE ADD KARO
             if (returnPage.HasValue) ReturnPage = returnPage.Value;
+        }
+
+        // ✅ Quick product add handler (database mein save)
+        public async Task<IActionResult> OnPostAddQuickProductAsync(
+            [FromBody] QuickProductInput input)
+        {
+            if (string.IsNullOrWhiteSpace(input.Name) || input.BasePrice <= 0 || input.Quantity < 0)
+            {
+                return new JsonResult(new { success = false, message = "Invalid product data." });
+            }
+
+            var existing = _context.Inventories
+                .FirstOrDefault(x => x.Name.ToLower() == input.Name.ToLower());
+
+            if (existing != null)
+            {
+                existing.Quantity += input.Quantity;
+                if (input.BasePrice > 0)
+                    existing.BasePrice = input.BasePrice;
+
+                await _context.SaveChangesAsync();
+
+                return new JsonResult(new
+                {
+                    success = true,
+                    isExisting = true,
+                    id = existing.Id,
+                    name = existing.Name,
+                    basePrice = existing.BasePrice,
+                    quantity = existing.Quantity,
+                    message = $"Product already exists! Stock updated to {existing.Quantity}."
+                });
+            }
+
+            var newProduct = new Inventory
+            {
+                Code = "QK-" + DateTime.Now.Ticks.ToString().Substring(10),
+                Name = input.Name.Trim(),
+                BasePrice = input.BasePrice,
+                Quantity = input.Quantity
+            };
+
+            _context.Inventories.Add(newProduct);
+            await _context.SaveChangesAsync();
+
+            return new JsonResult(new
+            {
+                success = true,
+                isExisting = false,
+                id = newProduct.Id,
+                name = newProduct.Name,
+                basePrice = newProduct.BasePrice,
+                quantity = newProduct.Quantity,
+                message = "New product added successfully!"
+            });
         }
 
         public async Task<IActionResult> OnPostAsync()
@@ -56,16 +107,20 @@ namespace FinalInventerySystem.Pages.Invoices
 
                 if (product == null || product.Quantity < item.Quantity)
                 {
-                    ModelState.AddModelError("", $"Not enough stock for {product?.Name ?? "Unknown"}");
+                    ModelState.AddModelError("",
+                        $"Not enough stock for {product?.Name ?? "Unknown"}");
                     return Page();
                 }
+
+                // ✅ User ki set ki hui price use karo, agar 0 ya empty ho to base price use karo
+                decimal finalPrice = item.CustomPrice > 0 ? item.CustomPrice : product.BasePrice;
 
                 var newItem = new InvoiceItem
                 {
                     InventoryId = product.Id,
                     Quantity = item.Quantity,
-                    UnitPrice = product.BasePrice,
-                    SubTotal = item.Quantity * product.BasePrice
+                    UnitPrice = finalPrice,
+                    SubTotal = item.Quantity * finalPrice
                 };
 
                 Invoice.InvoiceItems.Add(newItem);
@@ -79,13 +134,21 @@ namespace FinalInventerySystem.Pages.Invoices
             _context.Invoices.Add(Invoice);
             await _context.SaveChangesAsync();
 
-            // ? SIRF YEH LINE CHANGE - returnPage USE KARO
             return RedirectToPage("Index", new { pageIndex = ReturnPage });
         }
 
         public class InvoiceItemInput
         {
             public int InventoryId { get; set; }
+            public int Quantity { get; set; }
+            // ✅ NAYA - User ki set ki hui price
+            public decimal CustomPrice { get; set; }
+        }
+
+        public class QuickProductInput
+        {
+            public string Name { get; set; } = "";
+            public decimal BasePrice { get; set; }
             public int Quantity { get; set; }
         }
     }

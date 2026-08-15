@@ -117,5 +117,12 @@
     "AdjustmentType": "\u002B",
     "DiscountAmount": 15000,
     "LastUpdated": "2026-02-13T17:11:49.0806343+05:00"
+  },
+  "22": {
+    "InvoiceId": 22,
+    "AdjustmentAmount": 2000,
+    "AdjustmentType": "\u002B",
+    "DiscountAmount": 100000,
+    "LastUpdated": "2026-08-15T11:07:43.0104046+05:00"
   }
 }
