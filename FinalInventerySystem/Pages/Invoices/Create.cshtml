@@ -36,9 +36,8 @@
                 background-color: #f8f9fa;
             }
 
-    /* ✅ Price input styling */
     .price-input {
-        max-width: 130px;
+        max-width: 110px;
         border: 1px solid #ced4da;
         border-radius: 4px;
         padding: 4px 8px;
@@ -68,6 +67,13 @@
         .quick-add-btn:hover {
             background-color: #ffe69c;
         }
+
+    .update-price-label {
+        display: none;
+        font-size: 10px;
+        color: #856404;
+        cursor: pointer;
+    }
 </style>
 
 <div class="container mt-5">
@@ -108,9 +114,7 @@
                 <div class="mb-4 position-relative">
                     <label class="form-label fw-bold">
                         🔎 Search Product
-                        <small class="text-muted fw-normal ms-2">
-                            (F2 shortcut | 	Price can be edited per invoice)
-                        </small>
+                        <small class="text-muted fw-normal ms-2">(F2 shortcut)</small>
                     </label>
                     <input type="text" id="productSearch" class="form-control"
                            placeholder="Type product name..." autocomplete="off" />
@@ -124,8 +128,8 @@
                         <thead class="table-primary text-center align-middle">
                             <tr>
                                 <th style="width:22%;">Product</th>
-                                <th style="width:12%;">Stock</th>
-                                <th style="width:18%;">
+                                <th style="width:10%;">Stock</th>
+                                <th style="width:20%;">
                                     Price
                                     <small class="d-block fw-normal text-white-50" style="font-size:10px;">
                                         (Editable)
@@ -137,7 +141,6 @@
                             </tr>
                         </thead>
                         <tbody class="align-middle">
-                            <!-- Items dynamically add honge -->
                         </tbody>
                         <tfoot>
                             <tr>
@@ -164,7 +167,7 @@
     </div>
 </div>
 
-
+<!-- Quick Add Modal -->
 <div class="modal fade" id="quickAddModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -188,9 +191,7 @@
                     </label>
                     <input type="number" id="quickProductPrice" class="form-control"
                            placeholder="e.g. 500" min="1" step="0.01" />
-                    <small class="text-muted">
-                       This is the default price — you can change it per invoice
-                    </small>
+                    <small class="text-muted">Default price — can be changed per invoice</small>
                 </div>
                 <div class="mb-3">
                     <label class="form-label fw-bold">Stock Quantity</label>
@@ -206,7 +207,7 @@
                     Cancel
                 </button>
                 <button type="button" class="btn btn-warning fw-bold" id="quickAddSaveBtn">
-                    <i class="bi bi-plus-circle"></i> Add & Add to Invoiceo
+                    <i class="bi bi-plus-circle"></i> Add & Add to Invoice
                 </button>
             </div>
         </div>
@@ -239,7 +240,7 @@
                 } else {
                     list += `<li class="list-group-item quick-add-btn"
                                         id="quickAddTrigger" data-name="${query}">
-                                                ➕ "<strong>${query}</strong>" 	not found —
+                                        ➕ "<strong>${query}</strong>" not found —
                                         <span class="text-warning fw-bold">Add New Product</span>
                                      </li>`;
                 }
@@ -270,8 +271,8 @@
             let price = parseFloat($("#quickProductPrice").val());
             let stock = parseInt($("#quickProductStock").val()) || 0;
 
-            if (!name) { showQuickAlert("danger", "❌ Product name zaruri hai!"); return; }
-            if (!price || price <= 0) { showQuickAlert("danger", "❌ Valid price enter karo!"); return; }
+            if (!name) { showQuickAlert("danger", "❌ Product name is required!"); return; }
+            if (!price || price <= 0) { showQuickAlert("danger", "❌ Enter a valid price!"); return; }
 
             $("#quickAddSaveBtn").prop("disabled", true).text("Saving...");
 
@@ -303,11 +304,11 @@
                     }
                 },
                 error: function() {
-                    showQuickAlert("danger", "❌ Server error! Dobara try karo.");
+                    showQuickAlert("danger", "❌ Server error! Please try again.");
                 },
                 complete: function() {
                     $("#quickAddSaveBtn").prop("disabled", false)
-                        .html('<i class="bi bi-plus-circle"></i> Add & Invoice Mein Shamil Karo');
+                        .html('<i class="bi bi-plus-circle"></i> Add & Add to Invoice');
                 }
             });
         });
@@ -318,13 +319,22 @@
                 .addClass("alert-" + type).html(message);
         }
 
+        // ✅ FIX 1: Indexes reorder karo - delete ke baad
+        function reorderIndexes() {
+            $("#invoiceItems tbody tr").each(function(index) {
+                $(this).find("input.inventory-id").attr("name", `SelectedItems[${index}].InventoryId`);
+                $(this).find("input.custom-price").attr("name", `SelectedItems[${index}].CustomPrice`);
+                $(this).find("input.qty").attr("name", `SelectedItems[${index}].Quantity`);
+                $(this).find("input.update-inventory-cb").attr("name", `SelectedItems[${index}].UpdateInventoryPrice`);
+            });
+        }
+
         // ✅ Product invoice table mein add karo
         function addProductToInvoice(id, name, price, stock) {
-            // Agar pehle se hai to qty +1
             let existingRow = $(`#invoiceItems tbody tr input.inventory-id[value="${id}"]`).closest('tr');
             if (existingRow.length > 0) {
                 let qtyInput = existingRow.find('.qty');
-                let current = parseInt(qtyInput.val()) || 0;
+                let current = parseFloat(qtyInput.val()) || 0;
                 let newQty = current + 1;
                 if (newQty <= stock) {
                     qtyInput.val(newQty).trigger('input');
@@ -357,18 +367,31 @@
                                            value="${price}"
                                            min="0"
                                            step="0.01"
-                                           title="Price change kar sakte hain" />
+                                           data-default="${price}"
+                                           title="You can change this price" />
                                 </div>
-                                <small class="text-muted" style="font-size:10px;">
-                                    Default: Rs. ${parseFloat(price).toLocaleString()}
-                                </small>
+                                <div class="mt-1">
+                                    <small class="text-muted" style="font-size:10px;">
+                                        Default: Rs. ${parseFloat(price).toLocaleString()}
+                                    </small><br>
+                                    <label class="update-price-label mt-1">
+                                        <input type="checkbox"
+                                               name="SelectedItems[${rowCount}].UpdateInventoryPrice"
+                                               class="update-inventory-cb me-1"
+                                               value="true" />
+                                        Update inventory price too?
+                                    </label>
+                                </div>
                             </td>
                             <td>
-                                <div class="input-group input-group-sm mx-auto" style="max-width: 120px;">
+                                <div class="input-group input-group-sm mx-auto" style="max-width: 130px;">
                                     <button class="btn btn-outline-secondary minus-btn" type="button">-</button>
                                     <input type="number"
                                            name="SelectedItems[${rowCount}].Quantity"
-                                           value="1" min="1" max="${stock}"
+                                           value="1"
+                                           min="0.1"
+                                           max="${stock}"
+                                           step="0.1"
                                            class="form-control form-control-sm qty text-center" />
                                     <button class="btn btn-outline-secondary plus-btn" type="button">+</button>
                                 </div>
@@ -384,6 +407,7 @@
                         </tr>`;
 
             $("#invoiceItems tbody").prepend(row);
+            reorderIndexes();
             recalcTotals();
             setTimeout(() => $("#invoiceItems tbody tr:first .qty").focus().select(), 100);
         }
@@ -400,57 +424,69 @@
             $("#productSearch").val("");
         });
 
-        // ✅ Price change hone pe highlight + recalc
+        // ✅ Price change hone pe checkbox show karo
         $(document).on("input", ".custom-price", function() {
-            let defaultPrice = parseFloat($(this).closest('td').find('small').text()
-                .replace("Default: Rs.", "").replace(/,/g, "").trim());
+            let defaultPrice = parseFloat($(this).data("default"));
             let currentPrice = parseFloat($(this).val());
+            let row = $(this).closest("tr");
+            let label = row.find(".update-price-label");
+            let cb = row.find(".update-inventory-cb");
 
-            if (currentPrice !== defaultPrice) {
+            if (currentPrice !== defaultPrice && currentPrice > 0) {
                 $(this).addClass("price-changed");
+                label.show();
             } else {
                 $(this).removeClass("price-changed");
+                label.hide();
+                cb.prop("checked", false);
             }
             recalcTotals();
         });
 
-        // ✅ Remove item
+        // ✅ FIX 1: Remove item + reorder indexes
         $(document).on("click", ".removeItem", function() {
             if (confirm("Are you sure?")) {
                 $(this).closest("tr").remove();
+                reorderIndexes();
                 recalcTotals();
             }
         });
 
-        // ✅ + - buttons
+        // ✅ FIX 2: Float quantity - + button 0.1 step
         $(document).on("click", ".plus-btn", function() {
             let input = $(this).siblings(".qty");
-            let max = parseInt(input.attr("max"));
-            let current = parseInt(input.val()) || 0;
-            if (current < max) { input.val(current + 1).trigger("input"); }
-            else { alert(`❌ Maximum stock! Only ${max} available.`); }
+            let max = parseFloat(input.attr("max"));
+            let current = parseFloat(input.val()) || 0;
+            let newVal = Math.round((current + 0.1) * 10) / 10;
+            if (newVal <= max) {
+                input.val(newVal).trigger("input");
+            } else {
+                alert(`❌ Maximum stock! Only ${max} available.`);
+            }
         });
 
         $(document).on("click", ".minus-btn", function() {
             let input = $(this).siblings(".qty");
-            let current = parseInt(input.val()) || 1;
-            if (current > 1) input.val(current - 1).trigger("input");
+            let current = parseFloat(input.val()) || 0.1;
+            let newVal = Math.round((current - 0.1) * 10) / 10;
+            if (newVal >= 0.1) {
+                input.val(newVal).trigger("input");
+            }
         });
 
-        // ✅ Recalculate totals - price input se calculate karo
-        $(document).on("input", ".qty", recalcTotals);
+        // ✅ Recalculate totals - float support
+        $(document).on("input", ".qty, .custom-price", recalcTotals);
 
         function recalcTotals() {
             let total = 0;
             $("#invoiceItems tbody tr").each(function() {
                 let qty = parseFloat($(this).find(".qty").val()) || 0;
-                // ✅ Price ab price-input se lo
                 let price = parseFloat($(this).find(".custom-price").val()) || 0;
-                let subtotal = qty * price;
+                let subtotal = Math.round(qty * price * 100) / 100;
                 $(this).find(".subtotal").text("Rs. " + subtotal.toLocaleString());
                 total += subtotal;
             });
-            $("#grandTotal").text("Rs. " + total.toLocaleString());
+            $("#grandTotal").text("Rs. " + (Math.round(total * 100) / 100).toLocaleString());
         }
 
         // ✅ Keyboard shortcuts

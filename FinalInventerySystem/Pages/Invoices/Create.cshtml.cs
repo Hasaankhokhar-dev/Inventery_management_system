@@ -34,7 +34,7 @@ namespace FinalInventerySystem.Pages.Invoices
             if (returnPage.HasValue) ReturnPage = returnPage.Value;
         }
 
-        // ✅ Quick product add handler (database mein save)
+        // ✅ Quick product add handler
         public async Task<IActionResult> OnPostAddQuickProductAsync(
             [FromBody] QuickProductInput input)
         {
@@ -112,13 +112,17 @@ namespace FinalInventerySystem.Pages.Invoices
                     return Page();
                 }
 
-                // ✅ User ki set ki hui price use karo, agar 0 ya empty ho to base price use karo
                 decimal finalPrice = item.CustomPrice > 0 ? item.CustomPrice : product.BasePrice;
+
+                if (item.UpdateInventoryPrice && item.CustomPrice > 0 && item.CustomPrice != product.BasePrice)
+                {
+                    product.BasePrice = item.CustomPrice;
+                }
 
                 var newItem = new InvoiceItem
                 {
                     InventoryId = product.Id,
-                    Quantity = item.Quantity,
+                    Quantity = (int)item.Quantity,
                     UnitPrice = finalPrice,
                     SubTotal = item.Quantity * finalPrice
                 };
@@ -126,7 +130,7 @@ namespace FinalInventerySystem.Pages.Invoices
                 Invoice.InvoiceItems.Add(newItem);
                 total += newItem.SubTotal;
 
-                product.Quantity -= item.Quantity;
+                product.Quantity -= (int)Math.Floor((double)item.Quantity);
             }
 
             Invoice.TotalAmount = total;
@@ -140,9 +144,11 @@ namespace FinalInventerySystem.Pages.Invoices
         public class InvoiceItemInput
         {
             public int InventoryId { get; set; }
-            public int Quantity { get; set; }
-            // ✅ NAYA - User ki set ki hui price
+            // ✅ Float quantity support
+            public decimal Quantity { get; set; }
             public decimal CustomPrice { get; set; }
+            // ✅ Inventory price update checkbox
+            public bool UpdateInventoryPrice { get; set; } = false;
         }
 
         public class QuickProductInput
